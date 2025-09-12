@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Glassmorphism Kimi-VL Chat – Light / Dark</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+  <script src="https://cdn.jsdelivr.net/npm/markdown-it@14/dist/markdown-it.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-diff.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+
+  <style>
+    :root{
+      --bg:#ffffff;
+      --text:#1d1d1f;
+      --subtle:#6e6e73;
+      --glass-bg:rgba(255,255,255,0.45);
+      --glass-border:rgba(255,255,255,0.30);
+      --glass-shadow:0 8px 32px rgba(0,0,0,0.08);
+      --user-bg:rgba(0,122,255,0.82);
+      --user-text:#ffffff;
+      --assis-bg:rgba(240,240,242,0.70);
+      --assis-text:#1d1d1f;
+      --code-bg:#f4f5f7;
+      --code-border:#007aff;
+    }
+    body[data-theme="dark"]{
+      --bg:#0a0a0c;
+      --text:#f5f5f7;
+      --subtle:#a2a2a7;
+      --glass-bg:rgba(30,30,32,0.55);
+      --glass-border:rgba(255,255,255,0.08);
+      --glass-shadow:0 8px 24px rgba(0,0,0,0.22);
+      --user-bg:rgba(0,122,255,0.70);
+      --user-text:#ffffff;
+      --assis-bg:rgba(58,58,60,0.50);
+      --assis-text:#f5f5f7;
+      --code-bg:#1c1c1e;
+      --code-border:#0a84ff;
+    }
+
+    html,body{height:100%;margin:0}
+    body{
+      display:flex;
+      background:var(--bg);
+      color:var(--text);
+      overflow:hidden;
+      font-family:-apple-system,BlinkMacSystemFont,"SF Pro",Helvetica,Arial,sans-serif;
+    }
+
+    #sidebar{
+      width:260px;
+      flex:none;
+      display:flex;
+      flex-direction:column;
+      padding:16px;
+      gap:12px;
+      background:var(--glass-bg);
+      backdrop-filter:blur(12px);
+      border-right:1px solid var(--glass-border);
+    }
+    .head{display:flex;align-items:center;gap:8px}
+    #sidebar button{padding:6px 12px;border:none;border-radius:16px;background:rgba(118,118,128,.12);color:var(--text);cursor:pointer;font-size:.8rem}
+    #sidebar button:hover{background:rgba(118,118,128,.20)}
+    #themeToggle{margin-left:auto;font-size:1.3rem;background:none;border:none;cursor:pointer}
+
+    .session-list{display:flex;flex-direction:column;gap:8px;max-height:50vh;overflow-y:auto;padding-right:4px}
+    .session-btn{width:100%;text-align:left;padding:10px 14px;border:none;border-radius:14px;background:rgba(118,118,128,.12);color:var(--text);font-size:.9rem;cursor:pointer;transition:background .15s}
+    .session-btn:hover{background:rgba(118,118,128,.20)}
+    .session-btn.active{background:var(--user-bg);color:var(--user-text)}
+
+    #right{flex:1 1 0;min-width:0;display:flex;flex-direction:column;height:100%}
+    #header{flex:none;padding:12px 20px;display:flex;align-items:center}
+    #chat{flex:1 1 0;min-height:0;padding:20px 24px;overflow-y:auto;display:flex;flex-direction:column;gap:16px}
+    #bottom{flex:none;padding:16px 24px;display:flex;gap:12px}
+
+    .glass{background:var(--glass-bg);backdrop-filter:blur(12px);border:1px solid var(--glass-border);border-radius:24px;box-shadow:var(--glass-shadow)}
+
+    .msg{max-width:78%;padding:14px 18px;line-height:1.48;word-break:break-word}
+    .user{align-self:flex-end;background:var(--user-bg);color:var(--user-text);border-radius:24px 8px 24px 24px;box-shadow:0 4px 16px rgba(0,122,255,.25)}
+    .assistant{align-self:flex-start;background:var(--assis-bg);color:var(--assis-text);border-radius:8px 24px 24px 24px}
+
+    pre[class*="language-"]{
+      background:var(--code-bg);
+      border-left:4px solid var(--code-border);
+      border-radius:8px;
+      padding:14px 18px;
+      overflow-x:auto;
+      font-size:.90rem;
+      line-height:1.52;
+      margin:.8em 0;
+      color:var(--text);
+    }
+    :not(pre)>code[class*="language-"]{
+      background:var(--code-bg);
+      padding:2px 6px;
+      border-radius:4px;
+      color:var(--text);
+      font-size:.88em;
+    }
+
+    body[data-theme="light"]{
+      --token-comment:   #6e6e73;
+      --token-keyword:   #d91e18;
+      --token-string:    #032f62;
+      --token-number:    #0550ae;
+      --token-function:  #6639ba;
+      --token-operator:  #6639ba;
+      --token-boolean:   #0550ae;
+      --token-regex:     #096da;
+      --token-attr-name: #0a3069;
+      --token-attr-value:#0a3069;
+    }
+    body[data-theme="dark"]{
+      --token-comment:   #a2a2a7;
+      --token-keyword:   #ff7b72;
+      --token-string:    #a5d6ff;
+      --token-number:    #79c0ff;
+      --token-function:  #d2a8ff;
+      --token-operator:  #d2a8ff;
+      --token-boolean:   #79c0ff;
+      --token-regex:     #a5d6ff;
+      --token-attr-name: #d2a8ff;
+      --token-attr-value:#79c0ff;
+    }
+
+    .token.comment,.token.prolog,.token.doctype,.token.cdata{color:var(--token-comment)}
+    .token.keyword,.token.atrule{color:var(--token-keyword)}
+    .token.string,.token.char,.token.attr-value{color:var(--token-string)}
+    .token.number,.token.boolean{color:var(--token-number)}
+    .token.function,.token.class-name{color:var(--token-function)}
+    .token.operator,.token.entity,.token.url{color:var(--token-operator)}
+    .token.regex{color:var(--token-regex)}
+    .token.attr-name{color:var(--token-attr-name)}
+    .token.punctuation{color:var(--subtle)}
+
+    .code-header{display:flex;justify-content:space-between;align-items:center;background:var(--code-bg);color:var(--subtle);padding:6px 14px;border-radius:8px 8px 0 0;font-size:12px}
+    .code-header span{text-transform:capitalize;font-weight:600;color:var(--text)}
+    .code-header button{background:rgba(0,122,255,.12);color:#007aff;border:none;border-radius:6px;padding:2px 10px;font-size:11px;cursor:pointer}
+    .code-header button:hover{background:rgba(0,122,255,.20)}
+
+    #bottom input{flex:1;padding:14px 22px;border:none;border-radius:28px;background:rgba(118,118,128,.24);color:var(--text);font-size:1rem;caret-color:#0a84ff}
+    #bottom input::placeholder{color:var(--subtle)}
+    #bottom button{padding:14px 24px;border:none;border-radius:28px;background:linear-gradient(135deg,#007aff 0%,#0051d5 100%);color:#fff;font-weight:600;font-size:1rem;cursor:pointer;transition:transform .15s}
+    #bottom button:disabled{opacity:.55;cursor:not-allowed}
+    #bottom button:not(:disabled):hover{transform:scale(1.03)}
+    #spinner{text-align:center;font-size:.85rem;color:var(--subtle);margin-top:6px}
+
+  </style>
+</head>
+
+<body data-theme="dark">
+<aside id="sidebar" class="glass">
+  <div class="head">
+    <span>Kimi-VL</span>
+    <button id="themeToggle" title="Toggle theme">💡</button>
+  </div>
+
+  <div id="sessionList" class="session-list"></div>
+
+  <button id="btnNew">New chat</button>
+  <button id="btnRename">Rename</button>
+  <button id="btnDelete">Delete</button>
+</aside>
+
+<section id="right">
+  <header id="header" class="glass">
+    <span id="chatTitle">General</span>
+  </header>
+
+  <main id="chat" class="glass" style="margin:12px">
+    <div id="spinner" hidden>Thinking…</div>
+  </main>
+
+  <footer id="bottom" class="glass">
+    <input id="input" placeholder="Message…" autocomplete="off"/>
+    <button id="send">Send</button>
+  </footer>
+</section>
+
+<script>
+const chat        = document.getElementById('chat');
+const input       = document.getElementById('input');
+const sendBtn     = document.getElementById('send');
+const spinner     = document.getElementById('spinner');
+const sessionList = document.getElementById('sessionList');
+const themeBtn    = document.getElementById('themeToggle');
+const chatTitle   = document.getElementById('chatTitle');
+
+const md = window.markdownit({
+  html:false,linkify:true,typographer:true,
+  highlight:(str,lang)=>{
+    if(lang&&Prism.languages[lang])try{return Prism.highlight(str,Prism.languages[lang],lang)}catch{}
+    return md.utils.escapeHtml(str);
+  }
+});
+
+function loadTheme(){
+  const t=localStorage.getItem('kimi-theme')||'dark';
+  document.body.dataset.theme=t;
+}
+function toggleTheme(){
+  const current=document.body.dataset.theme;
+  const next=current==='dark'?'light':'dark';
+  document.body.dataset.theme=next;
+  localStorage.setItem('kimi-theme',next);
+}
+themeBtn.addEventListener('click',toggleTheme);
+
+const STORAGE_KEY='kimi-sessions';let sessions={},current=null;
+function loadSessions(){try{const r=localStorage.getItem(STORAGE_KEY);if(r)sessions=JSON.parse(r)}catch{}if(!sessions||typeof sessions!=='object')sessions={};if(Object.keys(sessions).length===0)sessions={'General':[{role:'system',content:'You are a helpful assistant.'}]}}
+function saveSessions(){localStorage.setItem(STORAGE_KEY,JSON.stringify(sessions))}
+
+function renderSessionList(){
+  sessionList.innerHTML='';
+  Object.keys(sessions).forEach(name=>{
+    const btn=document.createElement('button');
+    btn.className='session-btn';
+    btn.textContent=name;
+    if(name===current)btn.classList.add('active');
+    btn.onclick=()=>switchSession(name);
+    sessionList.appendChild(btn);
+  });
+}
+function switchSession(name){
+  current=name;
+  renderSessionList();
+  renderChat();
+  chatTitle.textContent=name;
+}
+function newSession(){
+  const name=prompt('New session name:')?.trim();
+  if(!name||sessions[name])return;
+  sessions[name]=[{role:'system',content:'You are a helpful assistant.'}];
+  saveSessions();
+  switchSession(name);
+}
+function renameSession(){
+  const old=current,n=prompt('Rename session:',old)?.trim();
+  if(!n||n===old||sessions[n])return;
+  sessions[n]=sessions[old];delete sessions[old];
+  saveSessions();
+  switchSession(n);
+}
+function deleteSession(){
+  if(Object.keys(sessions).length===1)return alert('Keep at least one session.');
+  if(!confirm(`Delete “${current}”?`))return;
+  delete sessions[current];
+  saveSessions();
+  switchSession(Object.keys(sessions)[0]);
+}
+
+function renderChat(){
+  chat.innerHTML='<div id="spinner" hidden>Thinking…</div>';
+  if(!current)return;
+  sessions[current].forEach(m=>{if(m.role!=='system')addMsg(m.role,m.content)});
+  chat.scrollTop=chat.scrollHeight;
+}
+function addMsg(role,rawTxt,append=false){
+  let div=chat.lastElementChild;
+  if(!append||!div||!div.classList.contains(role)){div=document.createElement('div');div.className='msg '+role;chat.appendChild(div)}
+  div.innerHTML=md.render(rawTxt);addCopyHeaders(div);chat.scrollTop=chat.scrollHeight;return div;
+}
+function addCopyHeaders(container){
+  container.querySelectorAll('pre code').forEach(block=>{
+    const pre=block.parentElement;
+    if(pre.parentElement.classList.contains('code-wrapper'))return;
+    const lang=(pre.className.match(/language-(\w+)/)||[])[1]||'text';
+    if(!block.dataset.highlighted){Prism.highlightElement(block);block.dataset.highlighted='true';}
+    const header=document.createElement('div');header.className='code-header';
+    header.innerHTML=`<span>${lang}</span><button>Copy</button>`;
+    header.querySelector('button').onclick=e=>{
+      navigator.clipboard.writeText(block.textContent);
+      e.target.textContent='Copied';setTimeout(()=>e.target.textContent='Copy',1500);
+    };
+    const wrapper=document.createElement('div');wrapper.className='code-wrapper';
+    pre.parentNode.insertBefore(wrapper,pre);wrapper.appendChild(header);wrapper.appendChild(pre);
+  });
+}
+
+async function ask(){
+  const question=input.value.trim();if(!question)return;
+  input.value='';sendBtn.disabled=true;spinner.hidden=false;
+
+  sessions[current].push({role:'user',content:question});
+  saveSessions();
+  addMsg('user',question);
+
+  sessions[current].push({role:'assistant',content:''});
+  saveSessions();
+
+  let assistantDiv=addMsg('assistant','');
+  let fullText='';
+
+  try{
+    const res=await fetch('http://172.18.31.67:8000/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'deepseek-r1-14b-q4',messages:sessions[current],max_tokens:1024,temperature:0.7,stream:true})
+    });
+    if(!res.ok)throw new Error('HTTP '+res.status);
+
+    const reader=res.body.getReader();
+    const decoder=new TextDecoder();
+    let buf='';
+
+    while(true){
+      const{done,value}=await reader.read();if(done)break;
+      buf+=decoder.decode(value,{stream:true});
+      const lines=buf.split('\n');buf=lines.pop();
+      for(const ln of lines){
+        if(!ln.startsWith('data: '))continue;
+        const p=ln.slice(6);if(p==='[DONE]')continue;
+        try{
+          const json=JSON.parse(p);
+          const delta=json.choices[0]?.delta?.content;
+          if(delta){
+            fullText+=delta;
+            assistantDiv.innerHTML=md.render(fullText);
+            addCopyHeaders(assistantDiv);
+            chat.scrollTop=chat.scrollHeight;
+          }
+        }catch{}
+      }
+    }
+
+    sessions[current][sessions[current].length-1].content=fullText;
+    saveSessions();
+
+  }catch(err){addMsg('assistant','Error: '+err.message)}
+  finally{sendBtn.disabled=false;spinner.hidden=true;}
+}
+
+document.getElementById('btnNew').addEventListener('click',newSession);
+document.getElementById('btnRename').addEventListener('click',renameSession);
+document.getElementById('btnDelete').addEventListener('click',deleteSession);
+sendBtn.onclick=ask;input.onkeyup=e=>{if(e.key==='Enter')ask()};
+
+loadTheme();
+loadSessions();
+current=Object.keys(sessions)[0];
+renderSessionList();
+renderChat();
+</script>
+</body>
+</html>
