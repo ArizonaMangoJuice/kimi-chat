@@ -297,7 +297,7 @@ async function ask(){
   let fullText='';
 
   try{
-    const res=await fetch('http://172.18.31.67:8000/v1/chat/completions',{
+    const res=await fetch('https://api.isaellizama.com/v1/chat/completions',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({model:'deepseek-r1-14b-q4',messages:sessions[current],max_tokens:1024,temperature:0.7,stream:true})
